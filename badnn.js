@@ -260,3 +260,62 @@ NeuralNet.prototype.trainGradientDescent = function(fitnessFunc, iterations = 30
     }
     
 }
+
+NeuralNet.prototype.modify = function(amount){
+
+    for(var i = 0; i < this.p.length; i ++){
+        for (var ii = 0; ii < this.p[i].length; ii++){
+            this.p[i][ii] += (Math.random()-0.5) * amount
+        }
+    }
+
+}
+
+
+NeuralNet.prototype.trainEvolution = function(fitnessFunc, popSize, generations){
+
+    // jumbles self, makes popsize jumbled copies
+
+    let pop = []
+    for(var i = 0; i < popSize; i ++){
+        this.modify(2)
+        pop.push(this.p)
+    }
+
+    let generationCount = 0;
+    while(generationCount < generations){
+        generationCount++
+
+        if(generationCount % 10 == 0){console.log(generationCount,
+            fitnessFunc(this)
+        )}
+
+        // let fitsum = 0
+
+        let fitnesses = []
+
+        for(var i = 0; i < popSize; i ++){
+            this.p = pop[i]
+            let v = fitnessFunc(this)
+            fitnesses.push(v)
+        }
+
+        // cull
+        while(pop.length > popSize * 0.1){
+            let min = 0
+            fitnesses.forEach((v, i)=>{if(v < fitnesses[min]){min=i}})
+            pop.splice(min, 1)
+            fitnesses.splice(min, 1)
+        }
+
+        // repopulate
+        while(pop.length < popSize){
+            let base = pop[Math.trunc(Math.random()*pop.length)]
+            this.p = base
+            this.modify(0.02)
+            pop.push(this.p)
+        }
+
+    }
+
+}
