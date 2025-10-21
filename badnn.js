@@ -222,12 +222,16 @@ NeuralNet.prototype.trainGradientDescent = function(fitnessFunc, iterations = 30
         }
     */
 
+    let previous
+
+
     let iterationCount = 0
+
     while(iterationCount < iterations){
 
         if(iterationCount % 100 == 0){console.log(iterationCount, fitnessFunc(this))}
 
-        let increment = Math.random()*(iterationCount < 200 ? 0.5 : 0.05)
+        let increment = Math.random()*(iterationCount < iterations*0.1 ? 1 : 0.1)
 
         iterationCount++
 
@@ -236,26 +240,36 @@ NeuralNet.prototype.trainGradientDescent = function(fitnessFunc, iterations = 30
             gradient.push(new Array(this.p[i].length))
         }
 
+        if(!previous){previous = gradient}
+
+        let gradientsum = 0
+        let total = 0
+
         // for every parameter
         for(var i = 0; i < this.p.length; i ++){
             for(var ii = 0; ii < this.p[i].length; ii ++){
+                // if(Math.random < 0.5){continue}// make it sparse
                 this.p[i][ii] += increment
                 let fitnessUp = fitnessFunc(this)
                 this.p[i][ii] -= increment*2
                 let fitnessDown = fitnessFunc(this)
                 this.p[i][ii] += increment
-                if(fitnessUp > fitnessDown){gradient[i][ii] = 1}else{gradient[i][ii] = -1}
+                gradient[i][ii] = fitnessUp - fitnessDown
+                gradientsum += Math.abs(gradient[i][ii])
+                total++
             }
         }
+
+        let oogradientav = total / gradientsum// one over gradient average
 
         // apply gradient
         for(var i = 0; i < gradient.length; i ++){
             for(var ii = 0; ii < gradient[i].length; ii ++){
-
-                this.p[i][ii] += increment * gradient[i][ii]
-
+                this.p[i][ii] += Math.atan(increment * (0.8*gradient[i][ii] + 0.2*previous[i][ii]) * oogradientav * oogradientav)
             }
         }
+
+        previous = gradient
 
     }
     
@@ -317,5 +331,19 @@ NeuralNet.prototype.trainEvolution = function(fitnessFunc, popSize, generations)
         }
 
     }
+
+    // find best model and apply it
+    let max
+    let maxmodel
+    this.p = pop[0]
+    max = fitnessFunc(this)
+    for(var i = 1; i < pop.length; i ++){
+        this.p = pop[i]
+        let fit = fitnessFunc(this)
+        if(fit > max){max = fit}
+        maxmodel = pop[i]
+    }
+
+    this.p = maxmodel
 
 }

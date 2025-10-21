@@ -18,18 +18,19 @@
 
                 let trialsum = 0
 
-                for(var i = 0; i < 10; i ++){
+                for(var i = 0; i < 100; i ++){
                     let input = Math.random()*20 - 10
                     let output = nn.evaluate([input])[0]
 
                     // return -Math.abs(output-(-(input-0.5)+0.5))
-                    trialsum += -Math.abs(output+input)
+                    let sin = Math.sin(input * 0.4)
+                    trialsum += -(output - sin) * (output - sin)
                 }
 
                 return trialsum
             }
 
-            let nn = new NeuralNet(1, 1, NeuralNet.prototype.createWeights(2, 2, 1, 1))
+            let nn = new NeuralNet(1, 1, NeuralNet.prototype.createWeights(3, 2, 1, 1))
             // nn.trainEvolution(fitnessFunc, 10, 1000)
             // nn.trainGradientDescent(fitnessFunc, 1000)
         </script>
@@ -39,8 +40,8 @@
         <script>
             setInterval(()=>{
 
-                nn.trainGradientDescent(fitnessFunc, 1000)
-                // nn.trainEvolution(fitnessFunc, 10, 1000)
+                nn.trainGradientDescent(fitnessFunc, 500)
+                // nn.trainEvolution(fitnessFunc, 10, 100)
 
                 const c = document.getElementById('main')
                 const ctx = c.getContext('2d')
@@ -49,14 +50,14 @@
                 ctx.fillRect(0,0,512,512)
 
                 ctx.fillStyle="#ffffff"
-                let yscale = 2
+                let yscale = 20
 
                 for(var i = -10; i < 20; i += 0.15){
                     let v = nn.evaluate([i])[0]
                     // console.log(v)
                     ctx.fillRect((i + 10)*512/20, -v*yscale + 256, 4, 2)
 
-                    ctx.fillRect((i + 10)*512/20, i*yscale + 256, 1, 1)
+                    ctx.fillRect((i + 10)*512/20, -Math.sin(i * 0.4)*yscale + 256, 1, 1)
 
                 }
             }, 1000
