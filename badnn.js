@@ -231,7 +231,8 @@ NeuralNet.prototype.trainGradientDescent = function(fitnessFunc, iterations = 30
 
         if(iterationCount % 100 == 0){console.log(iterationCount, fitnessFunc(this))}
 
-        let increment = Math.random()*(iterationCount < iterations*0.1 ? 1 : 0.1)
+        let increment = Math.random()*(iterationCount % 100 < 10 ? 1 : 0.1)*0.05
+        let ooinc = 1/increment
 
         iterationCount++
 
@@ -254,8 +255,10 @@ NeuralNet.prototype.trainGradientDescent = function(fitnessFunc, iterations = 30
                 this.p[i][ii] -= increment*2
                 let fitnessDown = fitnessFunc(this)
                 this.p[i][ii] += increment
-                gradient[i][ii] = fitnessUp - fitnessDown
-                gradientsum += Math.abs(gradient[i][ii])
+                let grad = (fitnessUp - fitnessDown)*ooinc
+                gradient[i][ii] = grad
+                gradientsum += Math.abs(grad)
+                // console.log(fitnessUp-fitnessDown)
                 total++
             }
         }
@@ -265,9 +268,12 @@ NeuralNet.prototype.trainGradientDescent = function(fitnessFunc, iterations = 30
         // apply gradient
         for(var i = 0; i < gradient.length; i ++){
             for(var ii = 0; ii < gradient[i].length; ii ++){
-                this.p[i][ii] += Math.atan(increment * (0.8*gradient[i][ii] + 0.2*previous[i][ii]) * oogradientav * oogradientav)
+                this.p[i][ii] += Math.atan(increment * (0.8*gradient[i][ii] + 0.4*previous[i][ii]) * oogradientav)
             }
         }
+
+        // console.log(gradient)
+        // console.log(gradient[1][1])
 
         previous = gradient
 
